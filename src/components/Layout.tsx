@@ -16,12 +16,7 @@ export function Layout() {
       <aside className="w-[92px] bg-[#f1f1f1] border-r border-gray-200 flex flex-col items-center flex-shrink-0">
         {/* Logo */}
         <div className="h-[70px] w-full flex items-center justify-center border-b border-white/10">
-          <svg width="51" height="29" viewBox="0 0 51 29" fill="none">
-            <path
-              d="M25.3 0L0 28.8h10.2L25.3 11.5 40.4 28.8h10.2L25.3 0z"
-              fill="#E5B290"
-            />
-          </svg>
+          <img src="/logo.png" alt="Maistyle" className="h-9 w-auto" />
         </div>
 
         {/* Navigation */}
