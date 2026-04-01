@@ -1,5 +1,5 @@
 import { useState, useRef, useEffect } from "react";
-import { useNavigate } from "react-router";
+import { useNavigate, useParams } from "react-router";
 import {
   Upload, X, Share2, Send, Plus, Minus, ChevronDown,
   Grid3x3, LayoutList, Download, Heart, Sparkles,
@@ -128,6 +128,25 @@ const defaultGeneratedPhotos: GeneratedPhoto[] = Array.from({ length: 12 }, (_, 
 // ─── component ──────────────────────────────────────────────────────────────
 export function StudioPage() {
   const navigate = useNavigate();
+  const { projectId } = useParams<{ projectId: string }>();
+
+  const storageKey = `project-title-${projectId}`;
+  const savedTitle = projectId ? localStorage.getItem(storageKey) : null;
+  const [projectTitle, setProjectTitle] = useState(savedTitle ?? "");
+  const [isEditingTitle, setIsEditingTitle] = useState(false);
+  const titleInputRef = useRef<HTMLInputElement>(null);
+
+  useEffect(() => {
+    if (isEditingTitle) titleInputRef.current?.select();
+  }, [isEditingTitle]);
+
+  const handleTitleBlur = () => {
+    const trimmed = projectTitle.trim();
+    const final = trimmed || "";
+    setProjectTitle(final);
+    if (projectId) localStorage.setItem(storageKey, final);
+    setIsEditingTitle(false);
+  };
 
   const [state, setState] = useState<StudioState>("empty");
   const [selectedModel, setSelectedModel] = useState("");
@@ -282,12 +301,29 @@ export function StudioPage() {
       {/* Header */}
       <div className="border-b border-gray-200 px-5 py-4 flex items-center justify-between bg-white">
         <div className="flex items-center gap-3">
-          <button onClick={() => navigate("/")} className="p-1 hover:bg-gray-100 rounded">
+          <button onClick={() => navigate("/projects")} className="p-1 hover:bg-gray-100 rounded">
             <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
               <path d="M12.5 15L7.5 10L12.5 5" stroke="black" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
             </svg>
           </button>
-          <span className="text-base font-semibold">2025 Fall & Winter Looks</span>
+          {isEditingTitle ? (
+            <input
+              ref={titleInputRef}
+              type="text"
+              value={projectTitle}
+              onChange={(e) => setProjectTitle(e.target.value)}
+              onBlur={handleTitleBlur}
+              onKeyDown={(e) => { if (e.key === "Enter" || e.key === "Escape") handleTitleBlur(); }}
+              className="text-base font-semibold bg-transparent border-b border-gray-400 outline-none min-w-[160px]"
+            />
+          ) : (
+            <span
+              onClick={() => setIsEditingTitle(true)}
+              className={`text-base font-semibold cursor-text hover:opacity-70 transition-opacity ${!projectTitle ? "text-gray-400 font-normal" : ""}`}
+            >
+              {projectTitle || "Untitled project"}
+            </span>
+          )}
         </div>
         <button className="flex items-center gap-2 px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 text-sm">
           <Share2 className="w-4 h-4" />
