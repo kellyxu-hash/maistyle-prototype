@@ -175,15 +175,10 @@ export function ProjectsPage() {
   );
 
   const closeDialog = () => {
-    const fromHome = searchParams.get("from") === "home";
     setShowDialog(false);
     setSearchQuery("");
     setSelectedTemplate(null);
-    if (fromHome) {
-      navigate("/");
-    } else {
-      setSearchParams({});
-    }
+    setSearchParams({});
   };
 
   const handleCreate = () => {
