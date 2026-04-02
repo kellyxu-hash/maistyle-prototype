@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { useNavigate } from "react-router";
+import { useNavigate, useSearchParams } from "react-router";
 import { Plus, MoreVertical, Calendar, Search, X } from "lucide-react";
 
 interface Project {
@@ -147,6 +147,7 @@ function saveProjects(projects: Project[]) {
 
 export function ProjectsPage() {
   const navigate = useNavigate();
+  const [searchParams, setSearchParams] = useSearchParams();
   const [projects, setProjectsState] = useState<Project[]>(loadProjects);
   const [, forceUpdate] = useState(0);
 
@@ -163,7 +164,7 @@ export function ProjectsPage() {
     window.addEventListener("focus", onFocus);
     return () => window.removeEventListener("focus", onFocus);
   }, []);
-  const [showDialog, setShowDialog] = useState(false);
+  const [showDialog, setShowDialog] = useState(() => searchParams.get("create") === "true");
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedTemplate, setSelectedTemplate] = useState<string | null>(null);
 
@@ -174,9 +175,15 @@ export function ProjectsPage() {
   );
 
   const closeDialog = () => {
+    const fromHome = searchParams.get("from") === "home";
     setShowDialog(false);
     setSearchQuery("");
     setSelectedTemplate(null);
+    if (fromHome) {
+      navigate("/");
+    } else {
+      setSearchParams({});
+    }
   };
 
   const handleCreate = () => {
