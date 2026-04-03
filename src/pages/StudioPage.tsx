@@ -156,8 +156,16 @@ export function StudioPage() {
   const [contentType, setContentType] = useState<ContentType>("photoshoots");
   const [viewMode, setViewMode] = useState<"grid" | "list">("grid");
 
+  // Project config from creation flow
+  const projectConfig = (() => {
+    try {
+      const raw = projectId ? localStorage.getItem(`project-config-${projectId}`) : null;
+      return raw ? JSON.parse(raw) : null;
+    } catch { return null; }
+  })();
+
   // Sidebar accordion
-  const [openSection, setOpenSection] = useState<"define" | "customize" | "upload" | null>("define");
+  const [openSection, setOpenSection] = useState<"setup" | "define" | "customize" | "upload" | null>("setup");
 
   // Define section
   const [selectedVibes, setSelectedVibes] = useState<string[]>([]);
@@ -300,12 +308,14 @@ export function StudioPage() {
     <div className="h-full flex flex-col">
       {/* Header */}
       <div className="border-b border-gray-200 px-5 py-4 flex items-center justify-between bg-white">
-        <div className="flex items-center gap-3">
-          <button onClick={() => navigate("/projects")} className="p-1 hover:bg-gray-100 rounded">
-            <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
-              <path d="M12.5 15L7.5 10L12.5 5" stroke="black" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
-            </svg>
+        <div className="flex items-center gap-2">
+          <button
+            onClick={() => navigate("/projects")}
+            className="text-sm text-gray-400 hover:text-gray-700 transition-colors font-medium"
+          >
+            Projects
           </button>
+          <span className="text-gray-300 text-sm">/</span>
           {isEditingTitle ? (
             <input
               ref={titleInputRef}
@@ -336,21 +346,94 @@ export function StudioPage() {
         <div className="w-[345px] bg-white border-r border-gray-200 flex flex-col flex-shrink-0">
           <div className="flex-1 overflow-auto p-4 space-y-4">
 
+            {/* 0 · Project Setup */}
+            {projectConfig && (
+              <div className="border-b border-gray-200 pb-1">
+                <button
+                  onClick={() => setOpenSection(openSection === "setup" ? null : "setup")}
+                  className="w-full flex items-center gap-3 mb-3"
+                >
+                  <span className="text-[15px] font-semibold text-[#DCB297] flex-1 text-left">Project Setup</span>
+                  {openSection === "setup" ? <Minus className="w-4 h-4 text-gray-600" /> : <Plus className="w-4 h-4 text-gray-600" />}
+                </button>
+
+                {openSection === "setup" && (
+                  <div className="space-y-4 pb-5 pl-4">
+                    {/* Theme */}
+                    <div>
+                      <p className="text-xs font-bold text-[#818d9c] mb-2">Theme</p>
+                      <div className="flex items-center gap-2">
+                        <img src={projectConfig.template.image} alt={projectConfig.template.name} className="w-10 h-10 rounded-lg object-cover flex-shrink-0" onError={e => { (e.target as HTMLImageElement).style.display = "none"; }} />
+                        <span className="text-xs font-medium text-gray-700">{projectConfig.template.name}</span>
+                      </div>
+                    </div>
+
+                    {/* Use Cases */}
+                    {projectConfig.useCases?.length > 0 && (
+                      <div>
+                        <p className="text-xs font-bold text-[#818d9c] mb-2">Use Cases</p>
+                        <div className="flex flex-wrap gap-1.5">
+                          {projectConfig.useCases.map((uc: string) => (
+                            <span key={uc} className="px-2.5 py-1 bg-[#DCB297]/10 text-[#B8936A] text-xs font-medium rounded-full">{uc}</span>
+                          ))}
+                        </div>
+                      </div>
+                    )}
+
+                    {/* Output Types */}
+                    {projectConfig.outputTypes?.length > 0 && (
+                      <div>
+                        <p className="text-xs font-bold text-[#818d9c] mb-2">Output Types</p>
+                        <div className="flex flex-wrap gap-1.5">
+                          {projectConfig.outputTypes.map((ot: string) => (
+                            <span key={ot} className="px-2.5 py-1 bg-[#DCB297]/10 text-[#B8936A] text-xs font-medium rounded-full">{ot}</span>
+                          ))}
+                        </div>
+                      </div>
+                    )}
+
+                    {/* Technical Specs */}
+                    {(projectConfig.aspectRatio || projectConfig.resolution) && (
+                      <div>
+                        <p className="text-xs font-bold text-[#818d9c] mb-2">Technical Specs</p>
+                        <div className="flex flex-wrap gap-1.5">
+                          {projectConfig.aspectRatio && <span className="px-2.5 py-1 bg-gray-100 text-gray-600 text-xs font-medium rounded-full">{projectConfig.aspectRatio}</span>}
+                          {projectConfig.resolution && <span className="px-2.5 py-1 bg-gray-100 text-gray-600 text-xs font-medium rounded-full">{projectConfig.resolution}</span>}
+                        </div>
+                      </div>
+                    )}
+
+                    {/* Models */}
+                    {projectConfig.models?.length > 0 && (
+                      <div>
+                        <p className="text-xs font-bold text-[#818d9c] mb-2">Models</p>
+                        <div className="flex flex-wrap gap-2">
+                          {projectConfig.models.map((m: { id: string; name: string; image: string }) => (
+                            <div key={m.id} className="flex flex-col items-center gap-1">
+                              <img src={m.image} alt={m.name} className="w-12 h-14 object-cover rounded-lg" onError={e => { (e.target as HTMLImageElement).style.display = "none"; }} />
+                              <span className="text-[10px] text-gray-500">{m.name}</span>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                )}
+              </div>
+            )}
+
             {/* 1 · Define */}
             <div className="border-b border-gray-200 pb-1">
               <button
                 onClick={() => setOpenSection(openSection === "define" ? null : "define")}
                 className="w-full flex items-center gap-3 mb-3"
               >
-                <div className="w-6 h-6 rounded-full border-2 border-[#DCB297] flex items-center justify-center flex-shrink-0">
-                  <span className="text-xs font-semibold text-[#DCB297]">1</span>
-                </div>
                 <span className="text-[15px] font-semibold text-[#DCB297] flex-1 text-left">Define</span>
                 {openSection === "define" ? <Minus className="w-4 h-4 text-gray-600" /> : <Plus className="w-4 h-4 text-gray-600" />}
               </button>
 
               {openSection === "define" && (
-                <div className="ml-9">
+                <div className="pl-4">
                   {/* Vibes */}
                   <p className="text-xs font-bold text-[#818d9c] mb-3">Vibes</p>
                   <div className="flex flex-wrap gap-2 pb-5">
@@ -426,15 +509,12 @@ export function StudioPage() {
                 onClick={() => setOpenSection(openSection === "customize" ? null : "customize")}
                 className="w-full flex items-center gap-3 mb-3"
               >
-                <div className="w-6 h-6 rounded-full border-2 border-[#DCB297] flex items-center justify-center flex-shrink-0">
-                  <span className="text-xs font-semibold text-[#DCB297]">2</span>
-                </div>
                 <span className="text-[15px] font-semibold text-[#DCB297] flex-1 text-left">Customize</span>
                 {openSection === "customize" ? <Minus className="w-4 h-4 text-gray-600" /> : <Plus className="w-4 h-4 text-gray-600" />}
               </button>
 
               {openSection === "customize" && (
-                <div className="ml-9 space-y-4 pb-5">
+                <div className="space-y-4 pb-5 pl-4">
                   {/* Locations */}
                   <div>
                     <p className="text-xs font-bold text-[#818d9c] mb-2">Locations</p>
@@ -543,9 +623,6 @@ export function StudioPage() {
                 onClick={() => setOpenSection(openSection === "upload" ? null : "upload")}
                 className="w-full flex items-center gap-3 mb-3"
               >
-                <div className="w-6 h-6 rounded-full border-2 border-[#DCB297] flex items-center justify-center flex-shrink-0">
-                  <span className="text-xs font-semibold text-[#DCB297]">3</span>
-                </div>
                 <span className="text-[15px] font-semibold text-[#DCB297] flex-1 text-left">
                   Upload {skus.length > 0 && `(${skus.length})`}
                 </span>
@@ -553,7 +630,7 @@ export function StudioPage() {
               </button>
 
               {openSection === "upload" && (
-                <div className="ml-9">
+                <div>
                   <input
                     ref={fileInputRef}
                     type="file"

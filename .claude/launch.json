@@ -2,13 +2,13 @@
   "version": "0.0.1",
   "configurations": [
     {
-      "name": "dev",
+      "name": "Dev Server",
       "runtimeExecutable": "/Users/kellyxu/.nvm/versions/node/v24.14.1/bin/node",
       "runtimeArgs": ["node_modules/.bin/vite"],
       "port": 5173
     },
     {
-      "name": "preview",
+      "name": "Preview Server",
       "runtimeExecutable": "/Users/kellyxu/.nvm/versions/node/v24.14.1/bin/node",
       "runtimeArgs": ["node_modules/.bin/vite", "preview"],
       "port": 4173
